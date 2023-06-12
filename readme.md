@@ -1,7 +1,3 @@
-# AndroidScreenQuick
+# AndroidWebSocketClient
 
-# 联系方式
-
-微信公众号：Android唐浮
-
-![二维码](./1.jpg)
+基于WebSocket实现对Android端的桌面及进程监控
