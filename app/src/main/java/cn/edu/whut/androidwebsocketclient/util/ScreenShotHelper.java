@@ -64,6 +64,22 @@ public class ScreenShotHelper {
         mImageReader.setOnImageAvailableListener(new ImageAvailableListener(), null);
     }
 
+    /**
+     * 停止截屏
+     */
+    public void stopScreenShot(){
+        Log.i(TAG,"Stop ScreenShot");
+        if(mVirtualDisplay != null) {
+            mVirtualDisplay.release();
+            mVirtualDisplay = null;
+        }
+
+        if(mMediaProjection != null) {
+            mMediaProjection.stop();
+            mMediaProjection = null;
+        }
+    }
+
 
     private MediaProjectionManager getMediaProjectionManager() {
         return (MediaProjectionManager) getContext().getSystemService(

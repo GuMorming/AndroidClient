@@ -8,8 +8,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 
 import android.view.View;
@@ -36,17 +34,18 @@ import cn.hutool.core.codec.Base64;
 public class MainActivity extends AppCompatActivity implements ScreenShotHelper.OnScreenShotListener,MWebSocketClient.CallBack {
     private final String TAG = "MainActivity";
     private static final int REQUEST_MEDIA_PROJECTION = 100;
-    private TextView tv_ip;
+    private TextView ip_textView;
+
+    ScreenShotHelper screenShotHelper;
 
     private MWebSocketClient webSocketClient;
     private boolean socketIsStarted = false;
-    private Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        tv_ip = findViewById(R.id.tv_ip);
+        ip_textView = findViewById(R.id.ip_textView);
 
         URI url = null;
         try {
@@ -54,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
             Map<String,String> httpHeaders = new HashMap<>();
             httpHeaders.put("username",DEVICE.DEVICE_NAME);
             httpHeaders.put("poolName",POOL_NAME_CLIENT);
-            webSocketClient = new MWebSocketClient(url, httpHeaders);
+            webSocketClient = new MWebSocketClient(url, this, httpHeaders);
             webSocketClient.setConnectionLostTimeout(5 * 1000);
             boolean flag = webSocketClient.connectBlocking();
             Toast.makeText(this, "链接状态：" + flag, Toast.LENGTH_LONG).show();
@@ -71,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
     @Override
     protected void onResume() {
         super.onResume();
-        tv_ip.setText(DEVICE.DEVICE_IP);
+        ip_textView.setText(DEVICE.DEVICE_IP);
     }
 
     /**
@@ -104,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
         if (requestCode == REQUEST_MEDIA_PROJECTION && data != null) {
             if (resultCode == RESULT_OK) {
                 // 截屏的回调
-                ScreenShotHelper screenShotHelper = new ScreenShotHelper(this, resultCode, data, this);
+                screenShotHelper = new ScreenShotHelper(this, resultCode, data, this);
                 screenShotHelper.startScreenShot();
             } else if (resultCode == RESULT_CANCELED) {
                 LogWrapper.d(TAG, "用户取消");
@@ -112,6 +111,11 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
         }
     }
 
+    /**
+     * 截图完成后
+     * @param bitmap
+     * @throws InterruptedException
+     */
     @Override
     public void onShotFinish(Bitmap bitmap) throws InterruptedException {
         LogWrapper.d(TAG, "bitmap:" + bitmap.getWidth());
@@ -123,33 +127,22 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
         }else{
             webSocketClient.reconnectBlocking();
         }
-//        String data = new String(byteBitmap, StandardCharsets.UTF_8);
-//        ClientTextMessage message = new ClientTextMessage(COMMAND_SCREENSHOT,data);
-//        mainHandler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (webSocketClient.isOpen()) {
-//                    webSocketClient.send(byteBitmap);
-//                }else{
-//                    try {
-//                        webSocketClient.reconnectBlocking();
-//                    } catch (InterruptedException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                }
-//            }
-//        });
-
     }
 
 
     @Override
-    public void onClientStatus(boolean isConnected) {
-
+    public void onClientStatus(boolean isConnected, String command) {
+        switch (command){
+            case COMMAND_SCREENSHOT:
+                tryStartScreenShot();
+                break;
+            case COMMAND_SCREENSHOT_STOP:
+                screenShotHelper.stopScreenShot();
+                break;
+            default:
+                break;
+        }
     }
 
-    @Override
-    public void onBitmapReceived(Bitmap bitmap) {
 
-    }
 }

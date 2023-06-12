@@ -35,7 +35,7 @@
             android:textSize="20sp" />
 
         <TextView
-            android:id="@+id/tv_ip"
+            android:id="@+id/ip_textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="10dp"
