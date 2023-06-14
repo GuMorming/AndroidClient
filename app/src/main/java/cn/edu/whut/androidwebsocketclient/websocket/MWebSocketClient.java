@@ -1,6 +1,9 @@
 package cn.edu.whut.androidwebsocketclient.websocket;
 
+import static cn.edu.whut.androidwebsocketclient.constants.DEVICE.DEVICE_NAME;
+import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_CONNECT;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_GREETING;
+import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_LEAVE;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SCREENSHOT;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SCREENSHOT_STOP;
 
@@ -39,8 +42,9 @@ public class MWebSocketClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshakeData) {
-        LogWrapper.e(TAG, "onOpen");
-        updateClientStatus(true, "connect");
+        Log.i(TAG, "onOpen");
+
+        updateClientStatus(true, COMMAND_CONNECT);
         try {
             getSocket().setReceiveBufferSize(5 * 1024 * 1024); // 接收缓冲区大小
         } catch (SocketException e) {
@@ -107,7 +111,7 @@ public class MWebSocketClient extends WebSocketClient {
     @Override
     public void onClose(int code, String reason, boolean remote) {
         Log.i(TAG,reason);
-        updateClientStatus(false, "close");
+        updateClientStatus(false, COMMAND_LEAVE);
     }
 
     @Override

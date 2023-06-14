@@ -5,6 +5,7 @@ public class MESSAGE_KEY {
     public static final String COMMAND_SCREENSHOT = "screenshot";
     public static final String COMMAND_SCREENSHOT_STOP = "screenshot_stop";
     public static final String COMMAND_GREETING = "greeting";
+    public static final String COMMAND_LEAVE = "leave";
 
     public static final String KEY_COMMAND = "command";
     public static final String KEY_POOL_NAME = "poolName";

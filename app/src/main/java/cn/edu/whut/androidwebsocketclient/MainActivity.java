@@ -1,6 +1,7 @@
 package cn.edu.whut.androidwebsocketclient;
 
 import static cn.edu.whut.androidwebsocketclient.constants.Config.*;
+import static cn.edu.whut.androidwebsocketclient.constants.DEVICE.DEVICE_NAME;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.*;
 
 import android.content.Context;
@@ -10,6 +11,7 @@ import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,6 +19,7 @@ import android.widget.Toast;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import cn.edu.whut.androidwebsocketclient.constants.Config;
 import cn.edu.whut.androidwebsocketclient.constants.DEVICE;
@@ -47,19 +50,26 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
         setContentView(R.layout.activity_main);
         ip_textView = findViewById(R.id.ip_textView);
 
-        URI url = null;
+        URI url;
         try {
             url = new URI(Config.URI_CONNECT);
             Map<String,String> httpHeaders = new HashMap<>();
-            httpHeaders.put("username",DEVICE.DEVICE_NAME);
+            httpHeaders.put("username", DEVICE_NAME);
             httpHeaders.put("poolName",POOL_NAME_CLIENT);
             webSocketClient = new MWebSocketClient(url, this, httpHeaders);
-            webSocketClient.setConnectionLostTimeout(5 * 1000);
-            boolean flag = webSocketClient.connectBlocking();
+            webSocketClient.setConnectionLostTimeout(1);
+            boolean flag = webSocketClient.connectBlocking(1, TimeUnit.SECONDS); // 开始连接
+            while(!flag){
+                Log.i(TAG,"Reconnecting...");
+                webSocketClient = new MWebSocketClient(url, this, httpHeaders);
+                webSocketClient.setConnectionLostTimeout(2);
+                flag = webSocketClient.connectBlocking(2, TimeUnit.SECONDS); // 开始连接
+            }
             Toast.makeText(this, "链接状态：" + flag, Toast.LENGTH_LONG).show();
             if(flag){
                 socketIsStarted = true;
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -130,15 +140,19 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
     }
 
 
+
+
     @Override
     public void onClientStatus(boolean isConnected, String command) {
         switch (command){
+
             case COMMAND_SCREENSHOT:
                 tryStartScreenShot();
                 break;
             case COMMAND_SCREENSHOT_STOP:
                 screenShotHelper.stopScreenShot();
                 break;
+
             default:
                 break;
         }

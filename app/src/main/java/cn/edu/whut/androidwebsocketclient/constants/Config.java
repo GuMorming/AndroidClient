@@ -6,6 +6,8 @@ import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.KEY_COMMA
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.KEY_POOL_NAME;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.KEY_USERNAME;
 
+import java.time.LocalTime;
+
 public class Config {
 
     public static final float IMAGE_SCALE = 0.4f;  // 设置缩放比例0.4 比较适合 (在ScreenShotHelper中设置)
