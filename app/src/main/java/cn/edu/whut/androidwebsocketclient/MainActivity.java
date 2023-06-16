@@ -4,6 +4,7 @@ import static cn.edu.whut.androidwebsocketclient.constants.Config.*;
 import static cn.edu.whut.androidwebsocketclient.constants.DEVICE.DEVICE_NAME;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.*;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,13 +36,13 @@ import cn.hutool.core.codec.Base64;
  * @author by talon, Date on 2020/6/20.
  * note: 主界面
  */
-public class MainActivity extends AppCompatActivity implements ScreenShotHelper.OnScreenShotListener,MWebSocketClient.CallBack {
+public class MainActivity extends AppCompatActivity implements ScreenShotHelper.OnScreenShotListener, MWebSocketClient.CallBack {
     private final String TAG = "MainActivity";
     private static final int REQUEST_MEDIA_PROJECTION = 100;
     private TextView ip_textView;
 
-    ScreenShotHelper screenShotHelper;
-
+    private ScreenShotHelper screenShotHelper;
+    private int screenshotNum = 0;
     private MWebSocketClient webSocketClient;
     private boolean socketIsStarted = false;
 
@@ -49,27 +51,39 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ip_textView = findViewById(R.id.ip_textView);
+        Button playButton = findViewById(R.id.btn_play);
+//        playButton.setOnClickListener(v->{
+//            Intent reboot = new Intent(Intent.ACTION_REBOOT);
+//            reboot.putExtra("nowait", 1);
+//            reboot.putExtra("interval", 1);
+//            reboot.putExtra("window", 0);
+//            sendBroadcast(reboot);
+//        });
 
         URI url;
         try {
             url = new URI(Config.URI_CONNECT);
-            Map<String,String> httpHeaders = new HashMap<>();
+            Map<String, String> httpHeaders = new HashMap<>();
             httpHeaders.put("username", DEVICE_NAME);
-            httpHeaders.put("poolName",POOL_NAME_CLIENT);
+            httpHeaders.put("poolName", POOL_NAME_CLIENT);
             webSocketClient = new MWebSocketClient(url, this, httpHeaders);
             webSocketClient.setConnectionLostTimeout(1);
             boolean flag = webSocketClient.connectBlocking(1, TimeUnit.SECONDS); // 开始连接
-            while(!flag){
-                Log.i(TAG,"Reconnecting...");
+            while (!flag) {
+                Log.i(TAG, "Reconnecting...");
                 webSocketClient = new MWebSocketClient(url, this, httpHeaders);
                 webSocketClient.setConnectionLostTimeout(2);
                 flag = webSocketClient.connectBlocking(2, TimeUnit.SECONDS); // 开始连接
             }
+            socketIsStarted = true;
+            //系统内存情况
+            //android.app.ActivityManager.MemoryInfo
+            ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+            //android.app.ActivityManager
+            ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+            webSocketClient.setMi(mi);
+            webSocketClient.setActivityManager(activityManager);
             Toast.makeText(this, "链接状态：" + flag, Toast.LENGTH_LONG).show();
-            if(flag){
-                socketIsStarted = true;
-            }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -91,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
     public void StartQuick(View view) {
         if (!socketIsStarted) {
             Toast.makeText(this, "websocket 服务启动异常！", Toast.LENGTH_SHORT).show();
-        }else {
+        } else {
             tryStartScreenShot();
         }
     }
@@ -115,14 +129,24 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
                 // 截屏的回调
                 screenShotHelper = new ScreenShotHelper(this, resultCode, data, this);
                 screenShotHelper.startScreenShot();
-            } else if (resultCode == RESULT_CANCELED) {
-                LogWrapper.d(TAG, "用户取消");
             }
+        } else if (resultCode == RESULT_CANCELED) {
+            LogWrapper.d(TAG, "用户取消");
+            onClientStatus(true, COMMAND_SCREENSHOT_CANCEL);
         }
     }
 
     /**
+     * 用户取消截图
+     */
+    public void screenshotCancel() {
+        ClientMessage clientMessage = new ClientMessage(COMMAND_SCREENSHOT_CANCEL, "");
+        webSocketClient.send(clientMessage.toJson().toString());
+    }
+
+    /**
      * 截图完成后
+     *
      * @param bitmap
      * @throws InterruptedException
      */
@@ -131,28 +155,32 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
         LogWrapper.d(TAG, "bitmap:" + bitmap.getWidth());
         final byte[] byteBitmap = BitmapUtils.getByteBitmap(bitmap);
         String encodedBitmapStr = Base64.encode(byteBitmap);
-        ClientMessage message = new ClientMessage(COMMAND_SCREENSHOT,encodedBitmapStr);
-        if(webSocketClient.isOpen()){
+        ClientMessage message = new ClientMessage(COMMAND_SCREENSHOT, encodedBitmapStr);
+        if (webSocketClient.isOpen()) {
             webSocketClient.send(message.toJson().toString());
-        }else{
+        } else {
             webSocketClient.reconnectBlocking();
         }
     }
 
 
-
-
     @Override
     public void onClientStatus(boolean isConnected, String command) {
-        switch (command){
-
+        switch (command) {
             case COMMAND_SCREENSHOT:
+                webSocketClient.screenshotNum++;
                 tryStartScreenShot();
                 break;
-            case COMMAND_SCREENSHOT_STOP:
-                screenShotHelper.stopScreenShot();
+            case COMMAND_SCREENSHOT_CANCEL:
+                webSocketClient.screenshotNum--;
+                screenshotCancel();
                 break;
-
+            case COMMAND_SCREENSHOT_STOP:
+                webSocketClient.screenshotNum--;
+                if (webSocketClient.screenshotNum <= 0) {
+                    screenShotHelper.stopScreenShot();
+                }
+                break;
             default:
                 break;
         }

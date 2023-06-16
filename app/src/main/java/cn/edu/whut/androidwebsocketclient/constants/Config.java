@@ -10,7 +10,7 @@ import java.time.LocalTime;
 
 public class Config {
 
-    public static final float IMAGE_SCALE = 0.4f;  // 设置缩放比例0.4 比较适合 (在ScreenShotHelper中设置)
+    public static final float IMAGE_SCALE = 0.6f;  // 设置缩放比例0.4 比较适合 (在ScreenShotHelper中设置)
 
     public static final int WINDOWS_SERVER_PORT = 8080;
     public static final String WINDOWS_SERVER_HOST = "10.0.2.2";
