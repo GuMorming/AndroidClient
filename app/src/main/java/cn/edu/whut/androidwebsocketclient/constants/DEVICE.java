@@ -1,13 +1,10 @@
 package cn.edu.whut.androidwebsocketclient.constants;
 
-import android.os.Build;
-import android.provider.Settings;
-
-import cn.edu.whut.androidwebsocketclient.util.IPUtils;
+import android.os.Process;
 
 public class DEVICE {
 
-//    public static final String DEVICE_NAME = Build.DEVICE;
-    public static final String DEVICE_NAME = Build.DEVICE;
-    public static final String DEVICE_IP = String.format("%s", IPUtils.getIpAddressString());
+    //    public static final String DEVICE_NAME = Build.DEVICE;
+    public static final String DEVICE_NAME = String.valueOf(Process.myUid());
+
 }

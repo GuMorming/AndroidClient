@@ -19,20 +19,20 @@ public class ClientMessage {
     private String command;
     private String data;
 
-    public ClientMessage(String command, String data){
+    public ClientMessage(String command, String data) {
         this.command = command;
         this.data = data;
     }
-    
+
     public ClientMessage(String json) throws JSONException {
         if (json != null && json.length() > 0) {
             JSONObject jsonObject = new JSONObject(json);
             this.command = jsonObject.optString(KEY_COMMAND);
             this.data = jsonObject.optString(KEY_DATA);
-            
+
         }
     }
-    
+
     public JSONObject toJson() {
         try {
             JSONObject jsonObject = new JSONObject();
@@ -42,15 +42,19 @@ public class ClientMessage {
         } catch (JSONException e) {
             return null;
         }
-        
+
     }
-    
-    
+
+
     public String getCommand() {
         return command;
     }
-    
+
     public String getData() {
         return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
     }
 }

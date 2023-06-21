@@ -1,16 +1,16 @@
 package cn.edu.whut.androidwebsocketclient.websocket;
 
+import static cn.edu.whut.androidwebsocketclient.MainActivity.webSocketClient;
+import static cn.edu.whut.androidwebsocketclient.constants.Config.POOL_NAME_CLIENT;
 import static cn.edu.whut.androidwebsocketclient.constants.DEVICE.DEVICE_NAME;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_AVAIL_MEMORY;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_CONNECT;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_GREETING;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_LEAVE;
+import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_LOCK_SCREEN;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SCREENSHOT;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SCREENSHOT_STOP;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_TOTAL_MEMORY;
+import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SELECT;
 
-import android.app.ActivityManager;
-import android.graphics.Bitmap;
 import android.util.Log;
 
 import org.java_websocket.client.WebSocketClient;
@@ -21,29 +21,22 @@ import org.json.JSONObject;
 import java.net.SocketException;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
+import cn.edu.whut.androidwebsocketclient.MainActivity;
+import cn.edu.whut.androidwebsocketclient.constants.Config;
 import cn.edu.whut.androidwebsocketclient.entity.ClientMessage;
 import cn.edu.whut.androidwebsocketclient.entity.MonitorMessage;
-import cn.edu.whut.androidwebsocketclient.util.LogWrapper;
 
-/**
- * @author by Talon, Date on 2020-04-13.
- * note: websocket 客户端
- */
+
 public class MWebSocketClient extends WebSocketClient {
-
     private final String TAG = "MWebSocketClient";
 
     private boolean mIsConnected = false;
     public int screenshotNum = 0;
     private CallBack mCallBack;
-
-    Timer timer;
-    private ActivityManager.MemoryInfo mi;
-    private ActivityManager activityManager;
 
     public MWebSocketClient(URI serverUri, CallBack callBack, Map<String, String> httpHeaders) {
         super(serverUri, httpHeaders);
@@ -57,26 +50,6 @@ public class MWebSocketClient extends WebSocketClient {
         updateClientStatus(true, COMMAND_CONNECT);
         try {
             getSocket().setReceiveBufferSize(5 * 1024 * 1024); // 接收缓冲区大小
-            activityManager.getMemoryInfo(mi);
-            //总内存
-            long totalMem = mi.totalMem / 1048576L;
-            ClientMessage totalMemMessage = new ClientMessage(COMMAND_TOTAL_MEMORY, totalMem + "");
-            send(totalMemMessage.toJson().toString());
-            // 低内存阈值
-//            Log.i(TAG, "低内存阈值:" + mi.threshold / 1048576L);
-            timer = new Timer();
-            TimerTask task = new TimerTask() {
-                @Override
-                public void run() {
-                    activityManager.getMemoryInfo(mi);
-                    long availMem = mi.availMem / 1048576L;
-                    //可用内存，字节为单位，转换为以MB为单位1048576=1024*1024
-//                    Log.i(TAG, "可用内存:" + mi.availMem / 1048576L);
-                    ClientMessage availMemMessage = new ClientMessage(COMMAND_AVAIL_MEMORY, availMem + "");
-                    send(availMemMessage.toJson().toString());
-                }
-            };
-            timer.schedule(task, 0, 1000);
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -100,6 +73,9 @@ public class MWebSocketClient extends WebSocketClient {
                     case COMMAND_GREETING:
                         sendGreetingToServer();
                         break;
+                    case COMMAND_SELECT:
+                        updateClientStatus(true, COMMAND_SELECT);
+                        break;
                     // 开始实时截图
                     case COMMAND_SCREENSHOT:
                         updateClientStatus(true, COMMAND_SCREENSHOT);
@@ -107,6 +83,10 @@ public class MWebSocketClient extends WebSocketClient {
                     // 停止截图
                     case COMMAND_SCREENSHOT_STOP:
                         updateClientStatus(true, COMMAND_SCREENSHOT_STOP);
+                        break;
+                    // 锁屏
+                    case COMMAND_LOCK_SCREEN:
+                        updateClientStatus(true, COMMAND_LOCK_SCREEN);
                         break;
                     default:
                         break;
@@ -122,42 +102,31 @@ public class MWebSocketClient extends WebSocketClient {
         send(message.toJson().toString());
     }
 
-    /**
-     * @param bytes The binary message that was received.
-     */
-    @Override
-    public void onMessage(ByteBuffer bytes) {
-//        byte[] buf = new byte[bytes.remaining()];
-//        bytes.get(buf);
-//        if (mCallBack != null)
-//            mCallBack.onBitmapReceived(BitmapUtils.decodeImg(buf));
-    }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        Log.i(TAG, reason);
-        timer.cancel();
+        Log.i(TAG, "onClose: " + code + ":" + reason);
         updateClientStatus(false, COMMAND_LEAVE);
+
     }
 
     @Override
     public void onError(Exception ex) {
-        Log.e(TAG, "onError()" + ex.getMessage());
-        timer.cancel();
+        Log.e(TAG, "onError(): " + ex.getMessage());
         ex.printStackTrace();
         updateClientStatus(false, "error");
     }
 
     private void updateClientStatus(boolean isConnected, String command) {
         mIsConnected = isConnected;
-        LogWrapper.d(TAG, "mIsConnected:" + mIsConnected);
+        Log.d(TAG, "mIsConnected:" + mIsConnected);
         // 回调
         if (mCallBack != null)
             mCallBack.onClientStatus(isConnected, command);
     }
 
     public boolean isConnected() {
-        LogWrapper.d(TAG, "mIsConnected:" + mIsConnected);
+        Log.d(TAG, "mIsConnected:" + mIsConnected);
         return mIsConnected;
     }
 
@@ -166,15 +135,6 @@ public class MWebSocketClient extends WebSocketClient {
      */
     public interface CallBack {
         void onClientStatus(boolean isConnected, String command);
-
-    }
-
-    public void setMi(ActivityManager.MemoryInfo mi) {
-        this.mi = mi;
-    }
-
-    public void setActivityManager(ActivityManager activityManager) {
-        this.activityManager = activityManager;
     }
 
 }

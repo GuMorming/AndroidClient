@@ -5,11 +5,6 @@ import android.content.Context;
 import android.view.Window;
 import android.view.WindowManager;
 
-/**
- * Created by Talon on 18/4/19.
- * 有关屏幕的一切操作
- */
-
 public class ScreenUtils {
 
     /**
@@ -48,6 +43,7 @@ public class ScreenUtils {
         final float scale = getScreenDensity(context);
         return (int) (px * scale + 0.5f);
     }
+
     /**
      * 把像素转换为密度
      */
@@ -58,9 +54,10 @@ public class ScreenUtils {
 
     /**
      * 设置全屏显示
+     *
      * @param context
      */
-    public static void setFullScreen(Activity context){
+    public static void setFullScreen(Activity context) {
         int flag = WindowManager.LayoutParams.FLAG_FULLSCREEN;
         Window myWindow = context.getWindow();
         myWindow.setFlags(flag, flag);// 设置为全屏
