@@ -19,21 +19,22 @@ public class BitmapUtils {
      * @return 压缩后的图片
      */
     public static Bitmap compressBitmap(Bitmap bitmap, long sizeLimit) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         int quality = 90;
-        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream);
         // 循环判断压缩后图片是否超过限制大小
-        while (baos.toByteArray().length / 1024 > sizeLimit) {
-            baos.reset();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
+        while (byteArrayOutputStream.toByteArray().length / 1024 > sizeLimit) {
+            byteArrayOutputStream.reset();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream);
             quality -= 10;
         }
-        return BitmapFactory.decodeStream(new ByteArrayInputStream(baos.toByteArray()), null, null);
+        return BitmapFactory.decodeStream(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), null, null);
     }
 
 
     /**
      * Bitmap 转二进制
+     *
      * @param bitmap
      * @return
      */

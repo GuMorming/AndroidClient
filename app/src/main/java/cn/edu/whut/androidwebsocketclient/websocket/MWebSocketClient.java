@@ -1,8 +1,5 @@
 package cn.edu.whut.androidwebsocketclient.websocket;
 
-import static cn.edu.whut.androidwebsocketclient.MainActivity.webSocketClient;
-import static cn.edu.whut.androidwebsocketclient.constants.Config.POOL_NAME_CLIENT;
-import static cn.edu.whut.androidwebsocketclient.constants.DEVICE.DEVICE_NAME;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_CONNECT;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_GREETING;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_LEAVE;
@@ -20,13 +17,8 @@ import org.json.JSONObject;
 
 import java.net.SocketException;
 import java.net.URI;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-import cn.edu.whut.androidwebsocketclient.MainActivity;
-import cn.edu.whut.androidwebsocketclient.constants.Config;
 import cn.edu.whut.androidwebsocketclient.entity.ClientMessage;
 import cn.edu.whut.androidwebsocketclient.entity.MonitorMessage;
 

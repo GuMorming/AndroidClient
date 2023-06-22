@@ -11,7 +11,7 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.util.Log;
 
-import cn.edu.whut.androidwebsocketclient.constants.Config;
+import cn.edu.whut.androidwebsocketclient.constants.CONFIG;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.SoftReference;
@@ -21,7 +21,6 @@ import java.nio.ByteBuffer;
  * 截屏的封装类，在onActivityResult中调用
  */
 public class ScreenShotHelper {
-
     private final String TAG = "ScreenShotHelper";
 
     private int mImageWidth;
@@ -51,8 +50,8 @@ public class ScreenShotHelper {
      * 获取屏幕相关数据
      */
     private void getScreenBaseInfo() {
-        mImageWidth = (int) (ScreenUtils.getScreenWidth(getContext()) * Config.IMAGE_SCALE);
-        mImageHeight = (int) (ScreenUtils.getScreenHeight(getContext()) * Config.IMAGE_SCALE);
+        mImageWidth = (int) (ScreenUtils.getScreenWidth(getContext()) * CONFIG.IMAGE_SCALE);
+        mImageHeight = (int) (ScreenUtils.getScreenHeight(getContext()) * CONFIG.IMAGE_SCALE);
         mScreenDensity = ScreenUtils.getScreenDensityDpi(getContext());
     }
 
@@ -67,14 +66,14 @@ public class ScreenShotHelper {
     /**
      * 停止截屏
      */
-    public void stopScreenShot(){
-        Log.i(TAG,"Stop ScreenShot");
-        if(mVirtualDisplay != null) {
+    public void stopScreenShot() {
+        Log.i(TAG, "Stop ScreenShot");
+        if (mVirtualDisplay != null) {
             mVirtualDisplay.release();
             mVirtualDisplay = null;
         }
 
-        if(mMediaProjection != null) {
+        if (mMediaProjection != null) {
             mMediaProjection.stop();
             mMediaProjection = null;
         }
@@ -87,13 +86,13 @@ public class ScreenShotHelper {
     }
 
     private void createVirtualDisplay() {
-        mVirtualDisplay = mMediaProjection.createVirtualDisplay("screen-mirror",
+        mVirtualDisplay = mMediaProjection.createVirtualDisplay(
+                "screen-mirror",
                 mImageWidth,
                 mImageHeight,
                 mScreenDensity,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-                mImageReader.getSurface(), null, null
-        );
+                mImageReader.getSurface(), null, null);
     }
 
     private Context getContext() {

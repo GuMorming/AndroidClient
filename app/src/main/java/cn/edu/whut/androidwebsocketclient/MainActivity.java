@@ -1,10 +1,9 @@
 package cn.edu.whut.androidwebsocketclient;
 
-import static cn.edu.whut.androidwebsocketclient.constants.Config.POOL_NAME_CLIENT;
-import static cn.edu.whut.androidwebsocketclient.constants.DEVICE.DEVICE_NAME;
+import static cn.edu.whut.androidwebsocketclient.constants.CONFIG.POOL_NAME_CLIENT;
+import static cn.edu.whut.androidwebsocketclient.constants.DEVICE.DEVICE_UID;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_DEVICE_INFO;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_LEAVE;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_LOCK_SCREEN;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SCREENSHOT;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SCREENSHOT_CANCEL;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SCREENSHOT_STOP;
@@ -44,7 +43,7 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import cn.edu.whut.androidwebsocketclient.broadcastReceiver.BatteryReceiver;
-import cn.edu.whut.androidwebsocketclient.constants.Config;
+import cn.edu.whut.androidwebsocketclient.constants.CONFIG;
 import cn.edu.whut.androidwebsocketclient.entity.ClientMessage;
 
 import cn.edu.whut.androidwebsocketclient.broadcastReceiver.NetworkReceiver;
@@ -88,22 +87,22 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
         Button occupyCPUBtn = findViewById(R.id.occupyCPU_btn);
         Button stopBtn = findViewById(R.id.btn_stop);
 
-
         try {
-            URI url = new URI(Config.URI_CONNECT);
+            URI url = new URI(CONFIG.URI_CONNECT);
             Map<String, String> httpHeaders = new HashMap<>();
-            httpHeaders.put("username", DEVICE_NAME);
+            httpHeaders.put("username", DEVICE_UID);
             httpHeaders.put("poolName", POOL_NAME_CLIENT);
+
+            //  真机调试用
+//            webSocketClient = new MWebSocketClient(new URI(CONFIG.URI_CONNECT_DEBUG), this, httpHeaders);
             webSocketClient = new MWebSocketClient(url, this, httpHeaders);
-//             真机调试用
-//            webSocketClient = new MWebSocketClient(new URI(Config.URI_CONNECT_DEBUG), this, httpHeaders);
             webSocketClient.setConnectionLostTimeout(5);
             boolean flag = webSocketClient.connectBlocking(1, TimeUnit.SECONDS); // 开始连接
             while (!flag) {
                 Log.i(TAG, "Reconnecting...");
+                //  真机调试用
+//                webSocketClient = new MWebSocketClient(new URI(CONFIG.URI_CONNECT_DEBUG), this, httpHeaders);
                 webSocketClient = new MWebSocketClient(url, this, httpHeaders);
-//                 真机调试用
-//                webSocketClient = new MWebSocketClient(new URI(Config.URI_CONNECT_DEBUG), this, httpHeaders);
                 webSocketClient.setConnectionLostTimeout(5);
                 flag = webSocketClient.connectBlocking(2, TimeUnit.SECONDS); // 开始连接
             }
@@ -131,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
         } catch (Exception e) {
             e.printStackTrace();
         }
+        // 耗CPU语句
         Timer useCPUTimer = new Timer();
         TimerTask task1 = new TimerTask() {
             @Override
@@ -299,19 +299,17 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
      * 截图完成后
      *
      * @param bitmap
-     * @throws InterruptedException
      */
     @Override
-    public void onShotFinish(Bitmap bitmap) throws InterruptedException {
+    public void onShotFinish(Bitmap bitmap) {
         Log.d(TAG, "bitmap:" + bitmap.getWidth());
+        // 获取截图的字节流
         final byte[] byteBitmap = BitmapUtils.getByteBitmap(bitmap);
+        // 用Base64编码
         String encodedBitmapStr = Base64.encode(byteBitmap);
+        // 发送
         ClientMessage message = new ClientMessage(COMMAND_SCREENSHOT, encodedBitmapStr);
-        if (webSocketClient.isOpen()) {
-            webSocketClient.send(message.toJson().toString());
-        } else {
-            webSocketClient.reconnectBlocking();
-        }
+        webSocketClient.send(message.toJson().toString());
     }
 
 
