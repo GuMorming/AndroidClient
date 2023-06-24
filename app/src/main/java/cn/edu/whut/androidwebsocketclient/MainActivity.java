@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.projection.MediaProjectionManager;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
@@ -19,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -47,6 +49,8 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
     private final String TAG = "MainActivity";
     private static final int REQUEST_MEDIA_PROJECTION = 100;
 
+    private TextView connectStatusText;
+
     Timer timer = new Timer();
     TimerTask task;
     boolean isTimerOn = false;
@@ -73,7 +77,8 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
         setContentView(R.layout.activity_main);
 
         Button occupyCPUBtn = findViewById(R.id.occupyCPU_btn);
-        Button stopBtn = findViewById(R.id.btn_stop);
+//        Button stopBtn = findViewById(R.id.btn_stop);
+        connectStatusText = findViewById(R.id.connectStatus_text);
 
         try {
             URI url = new URI(CONFIG.URI_CONNECT);
@@ -95,9 +100,12 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
                 flag = webSocketClient.connectBlocking(2, TimeUnit.SECONDS); // 开始连接
             }
             socketIsStarted = true;
+
             //系统内存情况
-            mi = new ActivityManager.MemoryInfo();
             activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+            mi = new ActivityManager.MemoryInfo();
+
+
             //注册网络状态监听广播
             networkReceiver = new NetworkReceiver();
             IntentFilter networkFilter = new IntentFilter();
@@ -132,10 +140,10 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
             }
         };
         occupyCPUBtn.setOnClickListener(v -> useCPUTimer.schedule(task1, 0));
-        stopBtn.setOnClickListener(v -> {
-            timer.cancel();
-            timer = new Timer();
-        });
+//        stopBtn.setOnClickListener(v -> {
+//            timer.cancel();
+//            timer = new Timer();
+//        });
 
     }
 
@@ -171,10 +179,14 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
                     screenShotHelper.stopScreenShot();
                 }
                 break;
+            case COMMAND_CONNECT:
+                connectStatusText.setText("已连接!");
+                break;
             case "error":
             case COMMAND_LEAVE:
                 timer.cancel();
                 isTimerOn = false;
+                connectStatusText.setText("未连接");
                 Log.e(TAG, "COMMAND_LEAVE");
                 break;
             default:
@@ -184,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
 
     public void sendDeviceInfoToServer() {
         activityManager.getMemoryInfo(mi);
-        //总内存(字节为单位), 转换为MB
+        //总内存(字节为单位), 转换为MB 1024*1024 = 1048576
         long totalMem = mi.totalMem / 1048576L;
         CPUInfoUtils.totalMem = totalMem;
         ClientMessage totalMemMessage = new ClientMessage(COMMAND_TOTAL_MEMORY, totalMem + "");
@@ -193,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
             @Override
             public void run() {
                 activityManager.getMemoryInfo(mi);
-                //可用内存(字节为单位), 转换为MB
+                //可用内存(字节为单位), 转换为MB 1024*1024 = 1048576
                 long availMemory = mi.availMem / 1048576L;
                 try {
                     JSONObject jsonObject = new JSONObject();

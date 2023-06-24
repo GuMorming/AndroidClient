@@ -29,7 +29,6 @@ public class CPUInfoUtils {
             //调用shell 执行 "top -n 1"
             process = Runtime.getRuntime().exec("top -n 1");
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//            StringBuilder stringBuilder = new StringBuilder();
             String line;
             int cpuIndex = -1;
             // 逐行读取
@@ -38,15 +37,6 @@ public class CPUInfoUtils {
                 if (TextUtils.isEmpty(line)) {
                     continue;
                 }
-//                stringBuilder.append(line).append("\n");
-                /*
-                // 不为空, 尝试读取cpu数据对应列号
-                int tempIndex = getCPUIndex(line);
-                if (tempIndex != -1) {
-                    cpuIndex = tempIndex;
-                    continue;
-                }
-*/
                 // 读取到"PID"说明下一行开始为各进程信息行
                 if (line.contains("PID")) {
                     // 且本行为表头行,获取CPU信息的列号
@@ -77,28 +67,7 @@ public class CPUInfoUtils {
                     // 退出循环, 不再读取
                     break;
                 }
-
-//                // 读取到CPU数据对应列号后, 获取到本进程对应信息行
-//                if (line.startsWith(String.valueOf(android.os.Process.myPid()))) {
-//                    if (cpuIndex == -1) {
-//                        continue;
-//                    }
-//                    // 以空格分割数据
-//                    String[] param = line.split("\\s+");
-//                    Log.i(TAG, "Param:" + Arrays.toString(param));
-//                    if (param.length <= cpuIndex) {
-//                        continue;
-//                    }
-//                    // 获取本进程的CPU使用率
-//                    String cpu = param[cpuIndex];
-//                    cpuUsage += Float.parseFloat(cpu);
-////                    if (cpu.endsWith("%")) {
-////                        cpu = cpu.substring(0, cpu.lastIndexOf("%"));
-////                        Log.i(TAG, "CPU:" + cpu);
-////                    }
-//                }
             }
-//            Log.i(TAG,stringBuilder.toString());
             // 除去CPU核心数为实际使用率
             return cpuUsage / Runtime.getRuntime().availableProcessors();
         } catch (IOException e) {

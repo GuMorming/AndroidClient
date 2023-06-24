@@ -129,6 +129,7 @@ public class ScreenShotHelper {
                     if (mOnScreenShotListener != null) {
                         if (bitmap != null) {
                             try {
+                                // 截图完成,准备发送给服务器
                                 mOnScreenShotListener.onShotFinish(bitmap);
                             } catch (UnsupportedEncodingException e) {
                                 throw new RuntimeException(e);

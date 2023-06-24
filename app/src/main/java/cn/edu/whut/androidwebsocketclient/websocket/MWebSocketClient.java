@@ -10,6 +10,7 @@ import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_S
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SELECT;
 
 import android.util.Log;
+import android.widget.TextView;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -27,6 +28,7 @@ import cn.edu.whut.androidwebsocketclient.entity.MonitorMessage;
 
 public class MWebSocketClient extends WebSocketClient {
     private final String TAG = "MWebSocketClient";
+    
 
     private boolean mIsConnected = false;
     public int screenshotNum = 0;
@@ -35,7 +37,6 @@ public class MWebSocketClient extends WebSocketClient {
     public MWebSocketClient(URI serverUri, CallBack callBack, Map<String, String> httpHeaders) {
         super(serverUri, httpHeaders);
         this.mCallBack = callBack;
-
     }
 
     @Override
