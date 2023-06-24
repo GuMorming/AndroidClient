@@ -4,6 +4,7 @@ import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_C
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_GREETING;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_LEAVE;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_LOCK_SCREEN;
+import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_QUALITY;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SCREENSHOT;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SCREENSHOT_STOP;
 import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SELECT;
@@ -19,6 +20,7 @@ import java.net.SocketException;
 import java.net.URI;
 import java.util.Map;
 
+import cn.edu.whut.androidwebsocketclient.constants.CONFIG;
 import cn.edu.whut.androidwebsocketclient.entity.ClientMessage;
 import cn.edu.whut.androidwebsocketclient.entity.MonitorMessage;
 
@@ -79,6 +81,9 @@ public class MWebSocketClient extends WebSocketClient {
                     // 锁屏
                     case COMMAND_LOCK_SCREEN:
                         updateClientStatus(true, COMMAND_LOCK_SCREEN);
+                        break;
+                    case COMMAND_QUALITY:
+                        CONFIG.setImageQuality(Integer.parseInt(message.getData()));
                         break;
                     default:
                         break;

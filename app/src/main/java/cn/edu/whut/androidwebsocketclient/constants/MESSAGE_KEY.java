@@ -9,13 +9,12 @@ public class MESSAGE_KEY {
     public static final String COMMAND_SCREENSHOT_STOP = "screenshot_stop";
     public static final String COMMAND_SCREENSHOT_CANCEL = "screenshot_cancel";
     public static final String COMMAND_LOCK_SCREEN = "lockScreen";
+    public static final String COMMAND_QUALITY = "quality";
 
     // 总内存
     public static final String COMMAND_TOTAL_MEMORY = "totalMemory";
     // 设备信息: 剩余内存, CPU使用率, 网速, 电量
     public static final String COMMAND_DEVICE_INFO = "deviceInfo";
-    // 网络状态相关
-    public static final String COMMAND_NETWORK = "network";
 
     // 连接与断开
     public static final String COMMAND_GREETING = "greeting";

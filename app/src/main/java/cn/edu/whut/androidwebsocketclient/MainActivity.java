@@ -2,19 +2,8 @@ package cn.edu.whut.androidwebsocketclient;
 
 import static cn.edu.whut.androidwebsocketclient.constants.CONFIG.POOL_NAME_CLIENT;
 import static cn.edu.whut.androidwebsocketclient.constants.DEVICE.DEVICE_UID;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_DEVICE_INFO;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_LEAVE;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SCREENSHOT;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SCREENSHOT_CANCEL;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SCREENSHOT_STOP;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_SELECT;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.COMMAND_TOTAL_MEMORY;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.KEY_AVAILABLE_MEMORY;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.KEY_BATTERY_LEVEL;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.KEY_COMMAND;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.KEY_CPU_USAGE;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.KEY_NETWORK;
-import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.KEY_NET_SPEED;
+import static cn.edu.whut.androidwebsocketclient.constants.MESSAGE_KEY.*;
+
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -43,10 +32,9 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import cn.edu.whut.androidwebsocketclient.broadcastReceiver.BatteryReceiver;
+import cn.edu.whut.androidwebsocketclient.broadcastReceiver.NetworkReceiver;
 import cn.edu.whut.androidwebsocketclient.constants.CONFIG;
 import cn.edu.whut.androidwebsocketclient.entity.ClientMessage;
-
-import cn.edu.whut.androidwebsocketclient.broadcastReceiver.NetworkReceiver;
 import cn.edu.whut.androidwebsocketclient.util.BitmapUtils;
 import cn.edu.whut.androidwebsocketclient.util.CPUInfoUtils;
 import cn.edu.whut.androidwebsocketclient.util.NetSpeedUtils;
@@ -224,6 +212,7 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
                     // 电量
                     jsonObject.put(KEY_BATTERY_LEVEL, batteryLevel);
                     webSocketClient.send(jsonObject.toString());
+                    Log.i(TAG, String.valueOf(CONFIG.IMAGE_QUALITY));
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -302,7 +291,7 @@ public class MainActivity extends AppCompatActivity implements ScreenShotHelper.
      */
     @Override
     public void onShotFinish(Bitmap bitmap) {
-        Log.d(TAG, "bitmap:" + bitmap.getWidth());
+        Log.d(TAG, "bitmap:" + bitmap.getAllocationByteCount() / 1024 + "kB");
         // 获取截图的字节流
         final byte[] byteBitmap = BitmapUtils.getByteBitmap(bitmap);
         // 用Base64编码

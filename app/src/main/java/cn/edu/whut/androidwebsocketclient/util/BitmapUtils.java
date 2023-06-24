@@ -1,5 +1,7 @@
 package cn.edu.whut.androidwebsocketclient.util;
 
+import static cn.edu.whut.androidwebsocketclient.constants.CONFIG.IMAGE_QUALITY;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -20,13 +22,13 @@ public class BitmapUtils {
      */
     public static Bitmap compressBitmap(Bitmap bitmap, long sizeLimit) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        int quality = 90;
-        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream);
+
+        bitmap.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, byteArrayOutputStream);
         // 循环判断压缩后图片是否超过限制大小
         while (byteArrayOutputStream.toByteArray().length / 1024 > sizeLimit) {
             byteArrayOutputStream.reset();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream);
-            quality -= 10;
+            bitmap.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, byteArrayOutputStream);
+            IMAGE_QUALITY -= 10;
         }
         return BitmapFactory.decodeStream(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), null, null);
     }

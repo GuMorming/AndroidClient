@@ -1,5 +1,7 @@
 package cn.edu.whut.androidwebsocketclient.util;
 
+import static cn.edu.whut.androidwebsocketclient.constants.CONFIG.IMAGE_QUALITY;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -39,7 +41,7 @@ public class ScreenShotHelper {
 
     public ScreenShotHelper(Context context, int resultCode, Intent data, OnScreenShotListener onScreenShotListener) {
         this.mOnScreenShotListener = onScreenShotListener;
-        this.mRefContext = new SoftReference<Context>(context);
+        this.mRefContext = new SoftReference<>(context);
         getScreenBaseInfo();
         mMediaProjection = getMediaProjectionManager().getMediaProjection(resultCode, data);
 //        mImageReader = ImageReader.newInstance(getScreenWidth(), getScreenHeight(), PixelFormat.RGBA_8888, 1);
