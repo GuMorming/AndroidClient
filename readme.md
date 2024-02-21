@@ -5,6 +5,7 @@
 WebSocket服务器及JavaWeb客户端:<https://github.com/GuMorming/AndroidMonitor>
 ## 页面设计
 ![登录页](/readMeImg/loginPage.png)
+![注册页](/readMeImg/registerPage.png)
 ![主页-数据区](/readMeImg/main-data.png)
 ![主页-监控区](/readMeImg/main-monitor.png)
 ![主页-回放区](/readMeImg/main-rePlay.png)
