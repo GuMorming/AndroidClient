@@ -12,5 +12,6 @@ WebSocket服务器及JavaWeb客户端:<https://github.com/GuMorming/AndroidMonit
 
 ## 效果展示
 ![测试-数据区](/readMeImg/test-data.png)
-![测试-桌面监控](/readMeImg/test-monitor.png)
+![测试-桌面监控1](/readMeImg/test-monitor1.png)
+![测试-桌面监控2](/readMeImg/test-monitor2.png)
 ![测试-回放](/readMeImg/test-rePlay.png)
