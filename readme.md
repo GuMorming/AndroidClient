@@ -1,6 +1,6 @@
 # AndroidWebSocketClient
 
-基于WebSocket实现对Android端的桌面及进程监控 前端搭建框架为[Tabler](https://tabler.io/)
+基于WebSocket实现对Android端的桌面及性能监控 前端搭建框架为[Tabler](https://tabler.io/)
 
 WebSocket服务器及JavaWeb客户端:<https://github.com/GuMorming/AndroidMonitor>
 ## 页面设计
